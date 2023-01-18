@@ -1,8 +1,7 @@
 using App.EnDecryption;
 using App.Models;
-using App.Screens.Home;
-using App.Screens.Login;
-using Microsoft.EntityFrameworkCore;
+using App.Models.Repositories;
+using App.Screens;
 
 namespace App
 {
@@ -17,26 +16,17 @@ namespace App
             // To customize application configuration such as set high DPI settings or default font,
             // see https://aka.ms/applicationconfiguration.
             ApplicationConfiguration.Initialize();
+            DdsDbInitializer.Initialize();
 
-            var ddsDbContext = new DdsDbContext();
+            Form homeWindow = new Login();
 
-            //ddsDbContext.Database.EnsureDeleted();
-            ddsDbContext.Database.EnsureCreated();
-
-            ddsDbContext.Employees.Load();
-            ddsDbContext.Events.Load();
-            ddsDbContext.Signatures.Load();
-            ddsDbContext.Session.Load();
-
-            MetroFramework.Forms.MetroForm homeWindow = new Login();
-
-            var session = ddsDbContext.Session.FirstOrDefault();
+            var session = SessionRepository.GetSession();
             if (session != null)
             {
-                var employee = ddsDbContext.Employees.FirstOrDefault(e => e.Registration == session.Registration && e.Password == AesOperation.DecryptString(session.PasswordDecryptionKey, session.PasswordEncrypted));
+                var employee = EmployeeRepository.GetEmployeeByLoginData(session.Registration, AesOperation.DecryptString(session.PasswordDecryptionKey, session.PasswordEncrypted));
                 if (employee != null)
                 {
-                    homeWindow = new Home();
+                    homeWindow = new Screens.Main();
                 }
             }
 

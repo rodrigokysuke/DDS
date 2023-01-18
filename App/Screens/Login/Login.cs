@@ -1,20 +1,15 @@
 using App.EnDecryption;
-using App.Models;
+using App.Extensions;
 using App.Models.Entities;
-using System.ComponentModel;
-using Panel = App.Screens.Home;
+using App.Models.Repositories;
 
-namespace App.Screens.Login;
+namespace App.Screens;
 
-public partial class Login : MetroFramework.Forms.MetroForm
+public partial class Login : Form
 {
-    private readonly DdsDbContext ddsDbContext;
-
     public Login()
     {
         InitializeComponent();
-
-        this.ddsDbContext = new DdsDbContext();
     }
 
     protected override void OnLoad(EventArgs e)
@@ -22,9 +17,10 @@ public partial class Login : MetroFramework.Forms.MetroForm
         base.OnLoad(e);
     }
 
-    protected override void OnClosing(CancelEventArgs e)
+    protected override void OnClosed(EventArgs e)
     {
-        base.OnClosing(e);
+        base.OnClosed(e);
+        Application.Exit();
     }
 
     private void Login_Load(object sender, EventArgs e)
@@ -38,29 +34,26 @@ public partial class Login : MetroFramework.Forms.MetroForm
     {
         if (!ComputeValidationErrors())
         {
-            var employee = ddsDbContext.Employees.FirstOrDefault(e => e.Registration == txtRegistration.Text && e.Password == txtPassword.Text);
+            var employee = EmployeeRepository.GetEmployeeByLoginData(txtRegistration.Text, txtPassword.Text);
             if (employee != null)
             {
-                ddsDbContext.Session.RemoveRange(ddsDbContext.Session);
-                ddsDbContext.SaveChanges();
+                SessionRepository.ClearSession();
 
                 if (ckbKeepSession.Checked)
                 {
                     var key = Guid.NewGuid().ToString().Replace("-", string.Empty);
                     var passwordEncrypted = AesOperation.EncryptString(key, txtPassword.Text);
 
-                    ddsDbContext.Session.Add(new Session
+                    var session = new Session
                     {
                         Registration = txtRegistration.Text,
                         PasswordEncrypted = passwordEncrypted,
                         PasswordDecryptionKey = key
-                    });
-                    ddsDbContext.SaveChanges();
+                    };
+                    SessionRepository.SetSession(session);
                 }
 
-                var homeWindow = new Panel.Home();
-                homeWindow.Show();
-                this.Hide();
+                this.Navigate(typeof(Main));
             }
             else lblLoginError.Text = "Matrícula e/ou senha incorretas.";
         }

@@ -5,7 +5,7 @@ namespace App.EnDecryption;
 
 internal class AesOperation
 {
-    public static string EncryptString(string key, string plainText)
+    internal static string EncryptString(string key, string plainText)
     {
         var iv = new byte[16];
         byte[] array;
@@ -31,7 +31,7 @@ internal class AesOperation
         return Convert.ToBase64String(array);
     }
 
-    public static string DecryptString(string? key, string? cipherText)
+    internal static string DecryptString(string key, string cipherText)
     {
         var iv = new byte[16];
         var buffer = Convert.FromBase64String(cipherText);

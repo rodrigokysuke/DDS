@@ -7,8 +7,8 @@ namespace App.Models.Entities
         [Required]
         public string? Registration { get; set; }
         [Required]
-        public string? PasswordEncrypted { get; set; }
+        public string PasswordEncrypted { get; set; } = string.Empty;
         [Required]
-        public string? PasswordDecryptionKey { get; set; }
+        public string PasswordDecryptionKey { get; set; } = string.Empty;
     }
 }

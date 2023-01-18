@@ -1,4 +1,4 @@
-﻿namespace App.Screens.Login;
+﻿namespace App.Screens;
 
 partial class Login
 {
